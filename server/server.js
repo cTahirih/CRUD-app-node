@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 app.use(require('./routes/user'));
 
 mongoose.connect(
-  'mongodb://localhost:27017/shoesStore',
+  process.env.URLDB,
   {useUnifiedTopology: true, useNewUrlParser: true, useCreateIndex: true },
   (error, resp) => {
   if(error) throw error;
