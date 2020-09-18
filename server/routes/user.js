@@ -90,7 +90,16 @@ app.put('/user/:id', (req, res) => {
 app.delete('/user/:id', (req, res) => {
   let id = req.params.id;
 
-  User.findByIdAndRemove(id, (onerror, userDelete) => {
+  let changeState = {
+    state: false
+  };
+  User.findByIdAndUpdate(
+    id,
+    changeState,
+    {
+      new: true
+    },
+    (onerror, userDelete) => {
     if (onerror) {
       res.status(400).json({
         ok: false,
