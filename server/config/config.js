@@ -17,7 +17,8 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'dev';
 if (process.env.NODE_ENV === 'dev') {
   urlDB = 'mongodb://localhost:27017/shoes-store'
 } else {
-  urlDB = process.env.MONGO_URI;
+  // urlDB = process.env.MONGO_URI;
+  urlDB = 'mongodb://shoes-store-user:cintiajaliri1994@ds139944.mlab.com:39944/shoes-store';
 }
 
 process.env.URLDB = urlDB;
