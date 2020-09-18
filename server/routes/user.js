@@ -9,7 +9,7 @@ app.get('/users', (req, res) => {
   let from = Number(req.query.from) || 0;
   let limitFromPage = Number(req.query.limit) || 5;
 
-  User.find({}, 'name email role state googleAccount image')
+  User.find({ state: true }, 'name email role state googleAccount image')
       .skip(from) //desde donde se obtiene la lista de usuarios
       .limit(limitFromPage) // el total que se quiere obtener
       .exec((onerror, users) => {
@@ -20,7 +20,7 @@ app.get('/users', (req, res) => {
           })
         }
 
-        User.count({}, (onerror, countRegister) => {
+        User.countDocuments({ state: true }, (onerror, countRegister) => {
           res.json({
             ok: true,
             users,
