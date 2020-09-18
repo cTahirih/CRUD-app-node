@@ -1,9 +1,13 @@
 {
   "name": "app-rest-node-mongo",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend para tienda de zapatos",
+  "engines": {
+    "node": "12.16.2"
+  },
   "main": "app.js",
   "scripts": {
+    "start": "node server/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
