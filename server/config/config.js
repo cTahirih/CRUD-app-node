@@ -10,6 +10,17 @@ process.env.PORT = process.env.PORT || 3000;
 process.env.NODE_ENV = process.env.NODE_ENV || 'dev';
 
 /*
+ * Expired date
+ * */
+
+process.env.EXP_TOKEN = 60 * 60;
+
+/*
+ * SEED auth
+ * */
+process.env.SEED = 'dev'
+
+/*
 * Data base
 *
 * */
