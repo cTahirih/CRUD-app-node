@@ -13,7 +13,7 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'dev';
  * Expired date
  * */
 
-process.env.EXP_TOKEN = 60 * 60;
+process.env.EXP_TOKEN = 60 * 60 * 24 *30;
 
 /*
  * SEED auth

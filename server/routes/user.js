@@ -1,10 +1,11 @@
 const express = require('express');
 const User = require('../models/user');
+const { validateToken } = require('../middlewares/auth');
 const bcrypt = require('bcrypt');
 const _ = require('underscore');
 const app = express();
 
-app.get('/users', (req, res) => {
+app.get('/users', validateToken, (req, res) => {
 
   let from = Number(req.query.from) || 0;
   let limitFromPage = Number(req.query.limit) || 5;
