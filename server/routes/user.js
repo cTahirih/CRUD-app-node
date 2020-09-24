@@ -31,7 +31,7 @@ app.get('/users', validateToken, (req, res) => {
       });
 });
 
-app.post('/user', (req, res) => {
+app.post('/user', validateToken, (req, res) => {
 
   let body = req.body;
 
@@ -58,7 +58,7 @@ app.post('/user', (req, res) => {
 
 });
 
-app.put('/user/:id', (req, res) => {
+app.put('/user/:id', validateToken, (req, res) => {
   let id = req.params.id;
   let body = _.pick( // filtramos solo los parametros que se quiere actualizar
     req.body,
@@ -88,7 +88,7 @@ app.put('/user/:id', (req, res) => {
 
 });
 
-app.delete('/user/:id', (req, res) => {
+app.delete('/user/:id', validateToken, (req, res) => {
   let id = req.params.id;
 
   let changeState = {

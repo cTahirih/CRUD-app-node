@@ -10,13 +10,13 @@ let validateToken = (req, resp, next) => {
     if (onerror) {
       return resp.status(401).json({
         ok: false,
-        error: onerror
+        error: 'Token no válido'
       });
     }
 
     req.user = decoded.user;
+    next();
   });
-  next();
 };
 
 module.exports = {
