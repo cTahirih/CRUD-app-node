@@ -1,6 +1,6 @@
 const express = require('express');
 const User = require('../models/user');
-const { validateToken } = require('../middlewares/auth');
+const { validateToken, verifyAdminRole } = require('../middlewares/auth');
 const bcrypt = require('bcrypt');
 const _ = require('underscore');
 const app = express();
@@ -31,7 +31,7 @@ app.get('/users', validateToken, (req, res) => {
       });
 });
 
-app.post('/user', validateToken, (req, res) => {
+app.post('/user', [validateToken, verifyAdminRole], (req, res) => {
 
   let body = req.body;
 
@@ -58,7 +58,7 @@ app.post('/user', validateToken, (req, res) => {
 
 });
 
-app.put('/user/:id', validateToken, (req, res) => {
+app.put('/user/:id', [validateToken, verifyAdminRole], (req, res) => {
   let id = req.params.id;
   let body = _.pick( // filtramos solo los parametros que se quiere actualizar
     req.body,
@@ -88,7 +88,7 @@ app.put('/user/:id', validateToken, (req, res) => {
 
 });
 
-app.delete('/user/:id', validateToken, (req, res) => {
+app.delete('/user/:id', [validateToken, verifyAdminRole], (req, res) => {
   let id = req.params.id;
 
   let changeState = {
