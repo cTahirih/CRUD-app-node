@@ -10,22 +10,32 @@ app.get('/users', validateToken, (req, res) => {
   let from = Number(req.query.from) || 0;
   let limitFromPage = Number(req.query.limit) || 5;
 
-  User.find({ state: true }, 'name email role state googleAccount image')
+  User.find({ userActive: true }, 'key firstName middleName lastName secondLastName email role userActive googleAccount image')
       .skip(from) //desde donde se obtiene la lista de usuarios
       .limit(limitFromPage) // el total que se quiere obtener
       .exec((onerror, users) => {
         if (onerror) {
           res.status(400).json({
-            ok: false,
-            error: onerror
+            data: {},
+            errorManager: {
+              status: res.statusCode,
+              errorNumber: 2,
+              description: onerror
+            }
           })
         }
 
-        User.countDocuments({ state: true }, (onerror, countRegister) => {
+        User.countDocuments({ userActive: true }, (onerror, countRegister) => {
           res.json({
-            ok: true,
-            users,
-            total: countRegister
+            data: {
+              users: [...users],
+              total: countRegister
+            },
+            errorManager: {
+              status: res.statusCode,
+              errorNumber: 0,
+              description: ''
+            }
           });
         });
       });
@@ -36,8 +46,12 @@ app.post('/user', [validateToken, verifyAdminRole], (req, res) => {
   let body = req.body;
 
   let user = new User({
-    name: body.name,
+    firstName: body.firstName,
+    middleName: body.middleName,
+    lastName: body.lastName,
+    secondLastName: body.secondLastName,
     email: body.email,
+    key: body.key,
     password: bcrypt.hashSync(body.password, 10), // encriptacion
     role: body.role
   });
@@ -45,28 +59,38 @@ app.post('/user', [validateToken, verifyAdminRole], (req, res) => {
   user.save((onerror, userDB) => {
     if (onerror) {
       res.status(400).json({
-        ok: false,
-        error: onerror
+        data: {},
+        errorManager: {
+          status: res.statusCode,
+          errorNumber: 2,
+          description: onerror.message
+        }
       })
     }
 
     res.json({
-      ok: true,
-      user: userDB
+      data: {
+        user: userDB
+      },
+      errorManager: {
+        status: res.statusCode,
+        errorNumber: 0,
+        description: ''
+      }
     });
   });
 
 });
 
-app.put('/user/:id', [validateToken, verifyAdminRole], (req, res) => {
-  let id = req.params.id;
+app.put('/user/:key', [validateToken, verifyAdminRole], (req, res) => {
   let body = _.pick( // filtramos solo los parametros que se quiere actualizar
     req.body,
-    ['name', 'email', 'image', 'role', 'state']
+    ['firstName', 'middleName', 'lastName', 'secondLastName', 'image', 'role', 'userActive']
   );
 
-  User.findByIdAndUpdate(
-    id,
+  const query = { key: req.params.key };
+  User.findOneAndUpdate(
+    query,
     body,
     {
       new: true,
@@ -75,51 +99,72 @@ app.put('/user/:id', [validateToken, verifyAdminRole], (req, res) => {
     (onerror, userDB) =>{
     if (onerror) {
       res.status(400).json({
-        ok: false,
-        error: onerror
+        data: {},
+        errorManager: {
+          status: res.statusCode,
+          errorNumber: 2,
+          description: `No se encontró ningún usuario con el id ${req.params.key}`
+        }
       })
     }
 
     res.json({
-      ok: true,
-      user: userDB
+      data: {
+        user: userDB
+      },
+      errorManager: {
+        status: res.statusCode,
+        errorNumber: 0,
+        description: ''
+      }
     });
   });
 
 });
 
-app.delete('/user/:id', [validateToken, verifyAdminRole], (req, res) => {
-  let id = req.params.id;
-
-  let changeState = {
-    state: false
+app.delete('/user/:key', [validateToken, verifyAdminRole], (req, res) => {
+  let changeUserActive = {
+    userActive: false
   };
-  User.findByIdAndUpdate(
-    id,
-    changeState,
+  const query = { key: req.params.key };
+  User.findOneAndUpdate(
+    query,
+    changeUserActive,
     {
       new: true
     },
     (onerror, userDelete) => {
     if (onerror) {
       res.status(400).json({
-        ok: false,
-        error: onerror
+        data: {},
+        errorManager: {
+          status: res.statusCode,
+          errorNumber: 2,
+          description: onerror
+        }
       })
     }
 
     if (!userDelete) {
       return res.status(400).json({
-        ok: false,
-        error: {
-          message: 'Usuario no encontrado'
+        data: {},
+        errorManager: {
+          status: res.statusCode,
+          errorNumber: 3,
+          description: 'Usuario no encontrado'
         }
       })
     }
 
     res.json({
-      ok: true,
-      user: userDelete
+      data: {
+        user: userDelete
+      },
+      errorManager: {
+        status: res.statusCode,
+        errorNumber: 0,
+        description: ''
+      }
     })
   });
 });

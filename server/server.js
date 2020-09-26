@@ -15,7 +15,13 @@ app.use(require('./routes/index'));
 
 mongoose.connect(
   process.env.URLDB,
-  {useUnifiedTopology: true, useNewUrlParser: true, useCreateIndex: true },
+  {
+    keepAlive: true,
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useFindAndModify: false,
+    useUnifiedTopology: true
+  },
   (error, resp) => {
   if(error) throw error;
 

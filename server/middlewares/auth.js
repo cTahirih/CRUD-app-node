@@ -9,8 +9,12 @@ let validateToken = (req, resp, next) => {
   jwt.verify(token, process.env.SEED, (onerror, decoded) => {
     if (onerror) {
       return resp.status(401).json({
-        ok: false,
-        error: 'Token no válido'
+        data: {},
+        errorManager: {
+          status: resp.statusCode,
+          errorNumber: 2,
+          description: 'Token no válido'
+        }
       });
     }
 
@@ -30,9 +34,11 @@ let verifyAdminRole = (req, resp, next) => {
     next();
   } else {
     return resp.json({
-      ok: false,
-      error: {
-        message: 'El usuario no es administrador'
+      data: {},
+      errorManager: {
+        status: resp.statusCode,
+        errorNumber: 3,
+        description: 'El usuario no es administrador'
       }
     });
   }

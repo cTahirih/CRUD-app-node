@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const shortid = require('shortid');
 const uniqueValidator = require('mongoose-unique-validator');
 
 let Schema = mongoose.Schema;
@@ -9,9 +10,24 @@ let roleValid = {
 }
 
 let userSchema = new Schema({
-  name: {
+  key: {
+    type: String,
+    default: shortid.generate
+  },
+  firstName: {
     type: String,
     required: [true, 'El nombre es requerido']
+  },
+  middleName: {
+    type: String
+  },
+  lastName: {
+    type: String,
+    required: [true, 'El apellido paterno es requerido']
+  },
+  secondLastName: {
+    type: String,
+    required: [true, 'El apellido materno es requerido']
   },
   email: {
     type: String,
@@ -31,7 +47,7 @@ let userSchema = new Schema({
     default: 'USER_ROLE',
     enum: roleValid
   },
-  state: {
+  userActive: {
     type: Boolean,
     default: true
   },
