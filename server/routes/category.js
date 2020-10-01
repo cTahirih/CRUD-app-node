@@ -1,5 +1,5 @@
 const express = require('express');
-const { verificaToken } = require('../middlewares/auth');
+const { validateToken, verifyAdminRole } = require('../middlewares/auth');
 const _ = require('underscore');
 const app = express();
 const Category = require('../models/category');
@@ -66,22 +66,33 @@ app.get('/category/:key', (req, resp) => {
 });
 
 // crear nueva categoria
-app.post('/category', (req, resp) => {
+app.post('/category', [validateToken, verifyAdminRole], (req, resp) => {
   let body = req.body;
 
   let category = new Category({
     key: body.key,
     description: body.description,
-    user: body.user
+    user: req.user._id
   });
 
   category.save((onerror, categoryDB) => {
     if (onerror) {
-      resp.status(400).json({
+      resp.status(500).json({
         data: {},
         errorManager: {
           status: resp.statusCode,
           errorNumber: 2,
+          description: onerror.message
+        }
+      })
+    }
+
+    if (!categoryDB) {
+      resp.status(400).json({
+        data: {},
+        errorManager: {
+          status: resp.statusCode,
+          errorNumber: 3,
           description: onerror.message
         }
       })
@@ -101,27 +112,38 @@ app.post('/category', (req, resp) => {
 });
 
 // actualiza una categoria
-app.put('/category/:key', (req, resp) => {
-  let body = _.pick( // filtramos solo los parametros que se quiere actualizar
-    req.body,
-    ['description']
-  );
+app.put('/category/:key',  [validateToken, verifyAdminRole], (req, resp) => {
+  let body = {
+    description: req.body.description
+  };
 
   const query = { key: req.params.key };
   Category.findOneAndUpdate(
     query,
     body,
     {
-      new: true
+      new: true,
+      runValidators: true
     },
     (onerror, categoryDB) =>{
       if (onerror) {
-        resp.status(400).json({
+        resp.status(500).json({
           data: {},
           errorManager: {
             status: resp.statusCode,
             errorNumber: 2,
             description: `No se encontró ninguna categoría con el id ${req.params.key}`
+          }
+        })
+      }
+
+      if (!categoryDB) {
+        resp.status(400).json({
+          data: {},
+          errorManager: {
+            status: resp.statusCode,
+            errorNumber: 3,
+            description: onerror.message
           }
         })
       }
@@ -140,15 +162,15 @@ app.put('/category/:key', (req, resp) => {
 });
 
 // elimina una categoria
-app.delete('/category/:key', (req, resp) => {
+app.delete('/category/:key',  [validateToken, verifyAdminRole], (req, resp) => {
   const query = { key: req.params.key };
 
-  Category.findOneAndDelete(
+  Category.findOneAndRemove(
     query,
     {new: true},
     (onerror, categoryDeleted) => {
       if (onerror) {
-        resp.status(400).json({
+        resp.status(500).json({
           data: {},
           errorManager: {
             status: resp.statusCode,
@@ -170,13 +192,11 @@ app.delete('/category/:key', (req, resp) => {
       }
 
       resp.json({
-        data: {
-          category: categoryDeleted
-        },
+        data: { },
         errorManager: {
           status: resp.statusCode,
           errorNumber: 0,
-          description: ''
+          description: 'Categoria eliminada'
         }
       })
     }
