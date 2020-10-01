@@ -42,9 +42,10 @@ app.get('/categories', (req, resp) => {
 // muestra categoria por KEY
 app.get('/category/:key', (req, resp) => {
   const query = { key: req.params.key };
-  Category.findOne(
-    query,
-    (onerror, categoryDB) =>{
+  Category.findOne(query)
+    .populate('user',
+      'firstName middleName lastName secondLastName email key')
+    .exec((onerror, categoryDB) =>{
       if (onerror) {
         resp.status(400).json({
           data: {},
@@ -66,7 +67,8 @@ app.get('/category/:key', (req, resp) => {
           description: ''
         }
       });
-    });
+    })
+
 });
 
 // crear nueva categoria
