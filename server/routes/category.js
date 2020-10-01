@@ -7,6 +7,10 @@ const Category = require('../models/category');
 // muestra toda las categorias
 app.get('/categories', (req, resp) => {
   Category.find({})
+    .sort('description')
+    .populate(
+      'user',
+      'firstName middleName lastName secondLastName email key')
     .exec((onerror, category) => {
       if (onerror) {
         resp.status(400).json({
