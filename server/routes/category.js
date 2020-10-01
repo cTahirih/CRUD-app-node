@@ -1,6 +1,5 @@
 const express = require('express');
 const { validateToken, verifyAdminRole } = require('../middlewares/auth');
-const _ = require('underscore');
 const app = express();
 const Category = require('../models/category');
 
