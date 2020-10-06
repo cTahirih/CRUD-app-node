@@ -47,6 +47,38 @@ app.get('/products', (req, resp) => {
     });
 });
 
+app.get('/product/search/:value', (req, resp) => {
+  const value = req.params.value;
+
+  const regex = new RegExp(value, 'i');
+
+  Product.find({productName: regex})
+    .populate('category', 'description')
+    .exec((onerror, products) => {
+      if (onerror) {
+        return res.status(500).json({
+          data: {},
+          errorManager: {
+            status: resp.statusCode,
+            errorNumber: 2,
+            description: onerror.message
+          }
+        });
+      }
+
+      resp.json({
+        data: {
+          products: products
+        },
+        errorManager: {
+          status: resp.statusCode,
+          errorNumber: 0,
+          description: ''
+        }
+      });
+    });
+});
+
 app.get('/product/:key', (req, resp) => {
   const query = { key: req.params.key };
 
