@@ -1,7 +1,11 @@
 const express = require('express');
 const fileUpload = require('express-fileupload');
+const fs = require('fs');
+const path = require('path');
 const app = express();
 const User = require('../models/user');
+const users = 'users';
+const products = 'products';
 
 app.use( fileUpload({ useTempFiles: true }) );
 
@@ -20,7 +24,7 @@ app.put('/upload/:type/:id', (req, resp) => {
     });
   }
 
-  let allowedTypes = ['products', 'users'];
+  let allowedTypes = [products, users];
 
   if (allowedTypes.indexOf(type) < 0) {
     return resp.status(400).json({
@@ -64,16 +68,63 @@ app.put('/upload/:type/:id', (req, resp) => {
       });
     }
 
-    resp.status(200).json({
-      data: {},
-      errorManager: {
-        status: resp.statusCode,
-        errorNumber: 0,
-        description: 'Archivo subido con éxito'
-      }
-    });
+    imageUser(id, resp, nameFile);
   });
 });
 
+const imageUser = (id, resp, nameFile) => {
+  User.findById(id, (onerror, userDB) => {
+    if (onerror) {
+      deleteFile(nameFile, users);
+      return resp.status(500).json({
+        data: {},
+        errorManager: {
+          status: resp.statusCode,
+          errorNumber: 2,
+          description: onerror
+        }
+      });
+    }
 
+    if (!userDB) {
+      deleteFile(nameFile, users);
+      return resp.status(400).json({
+        data: {},
+        errorManager: {
+          status: resp.statusCode,
+          errorNumber: 2,
+          description: 'Usuario no existe'
+        }
+      });
+    }
+
+    deleteFile(userDB.image, users);
+
+    userDB.image = nameFile;
+
+    userDB.save((onerror, userDBSave) => {
+      resp.status(200).json({
+        data: {
+          user: userDB
+        },
+        errorManager: {
+          status: resp.statusCode,
+          errorNumber: 0,
+          description: 'Archivo subido con éxito'
+        }
+      });
+    });
+  });
+};
+
+const imageProduct = () => {
+
+}
+
+const deleteFile = (nameImage, type) => {
+  let pathURLImage = path.resolve(__dirname, `../../uploads/${type}/${nameImage}`);
+  if (fs.existsSync(pathURLImage)) {
+    fs.unlinkSync(pathURLImage);
+  }
+}
 module.exports = app;
