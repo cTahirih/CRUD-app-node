@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const app = express();
 const User = require('../models/user');
+const Product = require('../models/products');
 const users = 'users';
 const products = 'products';
 
@@ -68,7 +69,9 @@ app.put('/upload/:type/:id', (req, resp) => {
       });
     }
 
-    imageUser(id, resp, nameFile);
+    type === users ?
+      imageUser(id, resp, nameFile) :
+      imageProduct(id, resp, nameFile);
   });
 });
 
@@ -104,8 +107,53 @@ const imageUser = (id, resp, nameFile) => {
 
     userDB.save((onerror, userDBSave) => {
       resp.status(200).json({
+          data: {
+            user: userDB
+          },
+          errorManager: {
+            status: resp.statusCode,
+            errorNumber: 0,
+            description: 'Archivo subido con éxito'
+          }
+        });
+      });
+    });
+};
+
+const imageProduct = (id, resp, nameFile) => {
+  Product.findById(id, (onerror, productDB) => {
+    if (onerror) {
+      deleteFile(nameFile, products);
+      return resp.status(500).json({
+        data: {},
+        errorManager: {
+          status: resp.statusCode,
+          errorNumber: 2,
+          description: onerror
+        }
+      });
+    }
+
+    if (!productDB) {
+      deleteFile(nameFile, products);
+      return resp.status(400).json({
+        data: {},
+        errorManager: {
+          status: resp.statusCode,
+          errorNumber: 2,
+          description: 'Producto no existe'
+        }
+      });
+    }
+
+    deleteFile(productDB.image, products);
+
+    productDB.image = nameFile;
+
+    productDB.save((onerror, productSave) => {
+      resp.status(200).json({
         data: {
-          user: userDB
+          product: productSave
         },
         errorManager: {
           status: resp.statusCode,
@@ -115,10 +163,6 @@ const imageUser = (id, resp, nameFile) => {
       });
     });
   });
-};
-
-const imageProduct = () => {
-
 }
 
 const deleteFile = (nameImage, type) => {
